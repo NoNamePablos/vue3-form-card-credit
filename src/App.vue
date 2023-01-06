@@ -1,13 +1,20 @@
 <script setup>
 import Layout from '@/components/Layout/Layout.vue';
 import cardPaymentVue from '@/components/card-payment/cardPayment.vue';
-import { ref, watch, computed, reactive } from 'vue';
+import { ref, watch, computed, reactive, onMounted } from 'vue';
 import CardTotal from '@/components/cardTotal.vue';
 import CardGlasm from '@/components/cardGlasm.vue';
 import CardPlan from '@/components/cardPlan.vue';
+import { useCounterStore } from '@/store.js';
+import MyModal from '@/components/mymodal.vue';
+
 components: {
-  Layout, cardPaymentVue, CardTotal, CardGlasm;
+  Layout, cardPaymentVue, CardTotal, CardGlasm, CardPlan;
 }
+
+const store = useCounterStore();
+const planeStore = computed(() => store.getAll);
+const planActive = reactive({});
 const stateCheckbox = ref(false);
 const formPayment = reactive({
   email: '',
@@ -17,23 +24,56 @@ const formPayment = reactive({
   promocode: '',
 });
 const promo = ref('PROMO1');
-const isPromoValid = ref(false);
+
+const planSelected = () => {
+  const activePlans = store.getPlanById;
+  planActive.value = activePlans(3);
+};
+onMounted(() => {
+  planSelected();
+  console.log(planActive.value);
+});
 watch(
   () => formPayment.promocode,
   (prom) => {
     isPromoValid.value = prom == promo.value ? true : false;
   }
 );
+
+const isModalOpen = ref(false);
+const isPromoValid = ref(false);
+
+const handlerCloseModal = () => {
+  isModalOpen.value = false;
+};
 </script>
 
 <template>
   <Layout>
+    <MyModal :isShow="isModalOpen" @close="handlerCloseModal">
+      <template v-slot:body>
+        <select>
+          <option
+            v-for="plan in planeStore"
+            :key="plan.idPlan"
+            :value="plan.title"
+          >
+            {{ plan.title }}
+          </option>
+        </select>
+      </template>
+    </MyModal>
     <cardPaymentVue>
+      <!--
+        TODO: фикс проблем с выбора изначального плана(Возможно подобрать хук или как-то подгуглить этот вопрос)
+      -->
       <template v-slot:card-right>
+        {{ planActive.title }}
         <div class="card-form">
           <div class="card-form__wrapper">
             <h4 class="card-form-title">Payment details</h4>
             <form @submit.prevent class="card-form__form">
+              <input type="button" @click="planSelected" />
               <myinputgroup :name="'Email'">
                 <myinput
                   :typeField="'email'"
@@ -104,8 +144,8 @@ watch(
           <div class="card-feature__body">
             <CardPlan
               :img="'1.png'"
-              :typePlan="'Professional plan'"
-              :price="96"
+              :typePlan="planActive.title"
+              :price="planActive.price"
             />
             <ul class="card-feature__list">
               <li class="list-item">
@@ -121,8 +161,10 @@ watch(
                 <p>all features in <span>basic includes</span></p>
               </li>
             </ul>
-            <mybutton :clases="['button-transparent', 'card-feature__button']"
-              >Make payment</mybutton
+            <mybutton
+              @click="isModalOpen = !isModalOpen"
+              :clases="['button-transparent', 'card-feature__button']"
+              >Modify plan</mybutton
             >
           </div>
         </div>
