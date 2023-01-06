@@ -10,4 +10,6 @@ ui.forEach(el=>{
      app.component(el.__name, el);
 })
 
+
+
 app.mount('#app')

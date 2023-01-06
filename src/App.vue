@@ -1,18 +1,29 @@
 <script setup>
 import Layout from '@/components/Layout/Layout.vue';
 import cardPaymentVue from '@/components/card-payment/cardPayment.vue';
-import { ref } from 'vue';
+import { ref, watch, computed, reactive } from 'vue';
+import CardTotal from '@/components/cardTotal.vue';
+import CardGlasm from '@/components/cardGlasm.vue';
+import CardPlan from '@/components/cardPlan.vue';
 components: {
-  Layout, cardPaymentVue;
+  Layout, cardPaymentVue, CardTotal, CardGlasm;
 }
 const stateCheckbox = ref(false);
-const formPayment = ref({
+const formPayment = reactive({
   email: '',
   cardNumber: '',
   expireDate: '',
   CVV: '',
   promocode: '',
 });
+const promo = ref('PROMO1');
+const isPromoValid = ref(false);
+watch(
+  () => formPayment.promocode,
+  (prom) => {
+    isPromoValid.value = prom == promo.value ? true : false;
+  }
+);
 </script>
 
 <template>
@@ -70,22 +81,10 @@ const formPayment = ref({
                   v-model="formPayment.promocode"
                 />
               </myinputgroup>
-              <div class="total">
-                <div class="total__text">Subtotal</div>
-                <div class="total__value">$64</div>
-              </div>
-              <div class="total">
-                <div class="total__text">Platform Fee</div>
-                <div class="total__value">$4</div>
-              </div>
-              <div class="total">
-                <div class="total__text">Promocode</div>
-                <div class="total__value">- $12</div>
-              </div>
-              <div class="total total-summary">
-                <div class="total__text">Total Amount</div>
-                <div class="total__value">$100</div>
-              </div>
+              <CardTotal :text="'Subtotal'" :value="64" />
+              <CardTotal :text="'Platform Fee'" :value="4" />
+              <CardTotal :text="'Promocode'" :value="12" v-if="isPromoValid" />
+              <CardTotal :text="'Total Amount'" :value="100" />
               <mybutton :type="'submit'" :clases="['button-primary']"
                 >Make payment</mybutton
               >
@@ -97,25 +96,17 @@ const formPayment = ref({
       <template v-slot:card-left>
         <div class="card-feature">
           <div class="card-feature__img">
-            <div class="card-glasm">
-              <div class="card-glasm__ico">
-                <img src="@/assets/img/favicon.ico" alt="" />
-              </div>
-              <p class="card-glasm__title">
-                Subscribe and start saving your money today
-              </p>
-            </div>
+            <CardGlasm
+              :img="'favicon.ico'"
+              :title="'Subcribe and save money every month!'"
+            />
           </div>
           <div class="card-feature__body">
-            <div class="card-plan">
-              <div class="card-plan__img">
-                <img src="@/assets/img/1.png" alt="" />
-              </div>
-              <div class="card-plan__block">
-                <p class="card-plan__type">Professional plan</p>
-                <div class="card-plan__cost">$96 / month</div>
-              </div>
-            </div>
+            <CardPlan
+              :img="'1.png'"
+              :typePlan="'Professional plan'"
+              :price="96"
+            />
             <ul class="card-feature__list">
               <li class="list-item">
                 <p>all features in <span>basic includes</span></p>
@@ -196,81 +187,10 @@ const formPayment = ref({
       margin-top: 20px;
     }
   }
-  & .card-glasm {
-    width: 100%;
-    height: 100%;
-    backdrop-filter: blur(11px) saturate(190%);
-    -webkit-backdrop-filter: blur(11px) saturate(190%);
-    background-color: rgba(17, 25, 40, 0.44);
-    border: 1px solid rgba(255, 255, 255, 0.125);
-  }
   &__button {
     padding-top: 20px;
     margin-top: auto;
     cursor: pointer;
-  }
-}
-.card-plan {
-  height: 100px;
-  width: calc(100% - 40px);
-  padding: 20px 30px;
-  display: flex;
-  align-items: center;
-  border-radius: 8px;
-  background-color: var(--color-white);
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  &__img {
-    width: 80px;
-    border-radius: 12px;
-    height: 100%;
-    object-fit: cover;
-  }
-  &__type {
-    margin-bottom: 10px;
-    color: var(--color-dark-grey);
-  }
-  &__cost {
-    font-weight: 500;
-    color: var(--color-text);
-  }
-  &__block {
-    display: flex;
-    flex-direction: column;
-  }
-}
-.card-glasm {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  &__ico {
-    margin-bottom: 10px;
-  }
-  &__title {
-    color: var(--color-white);
-    font-weight: 500;
-    font-size: 18px;
-    text-align: center;
-  }
-}
-
-.total {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  &__text {
-    color: var(--color-dark-grey);
-    font-size: 13px;
-  }
-  &__value {
-    font-weight: 500;
-  }
-  &-summary {
-    border-top: 1px solid var(--color-dark-grey);
-    padding-top: 15px;
   }
 }
 
