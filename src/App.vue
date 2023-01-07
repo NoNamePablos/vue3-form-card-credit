@@ -5,7 +5,7 @@ import { ref, watch, computed, reactive, onMounted } from 'vue';
 import CardTotal from '@/components/cardTotal.vue';
 import CardGlasm from '@/components/cardGlasm.vue';
 import CardPlan from '@/components/cardPlan.vue';
-import { useCounterStore } from '@/store.js';
+import { usePlanStore } from '@/store.js';
 import MyModal from '@/components/mymodal.vue';
 import { storeToRefs } from 'pinia';
 
@@ -13,7 +13,7 @@ components: {
   Layout, cardPaymentVue, CardTotal, CardGlasm, CardPlan;
 }
 
-const store = useCounterStore();
+const store = usePlanStore();
 const planeStore = computed(() => store.getAll);
 const planActive = ref({});
 const stateCheckbox = ref(false);
