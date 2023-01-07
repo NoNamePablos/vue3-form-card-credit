@@ -14,7 +14,7 @@ components: {
 
 const store = useCounterStore();
 const planeStore = computed(() => store.getAll);
-const planActive = reactive({});
+const planActive = ref({});
 const stateCheckbox = ref(false);
 const formPayment = reactive({
   email: '',
@@ -25,13 +25,24 @@ const formPayment = reactive({
 });
 const promo = ref('PROMO1');
 
+const modalPlanSelect = ref();
+
 const planSelected = () => {
   const activePlans = store.getPlanById;
-  planActive.value = activePlans(3);
+  planActive.value = activePlans(store.getActiveIndex);
 };
+
+const handlerSelectModal = () => {
+  try {
+    store.setActiveIndex(modalPlanSelect.value);
+  } catch (err) {
+    throw new ReferenceError('undefind');
+  }
+  planSelected();
+};
+
 onMounted(() => {
   planSelected();
-  console.log(planActive.value);
 });
 watch(
   () => formPayment.promocode,
@@ -52,28 +63,28 @@ const handlerCloseModal = () => {
   <Layout>
     <MyModal :isShow="isModalOpen" @close="handlerCloseModal">
       <template v-slot:body>
-        <select>
-          <option
-            v-for="plan in planeStore"
-            :key="plan.idPlan"
-            :value="plan.title"
+        <div class="select__body">
+          <select v-model="modalPlanSelect">
+            <option
+              v-for="plan in planeStore"
+              :key="plan.idPlan"
+              :value="plan.idPlan"
+            >
+              {{ plan.title }}
+            </option>
+          </select>
+          <mybutton :clases="['button-primary']" @click="handlerSelectModal"
+            >Select Plan</mybutton
           >
-            {{ plan.title }}
-          </option>
-        </select>
+        </div>
       </template>
     </MyModal>
     <cardPaymentVue>
-      <!--
-        TODO: фикс проблем с выбора изначального плана(Возможно подобрать хук или как-то подгуглить этот вопрос) Можно добавить активный план в state и от туда плясать (Это вроде самое простое решение)
-      -->
       <template v-slot:card-right>
-        {{ planActive.title }}
         <div class="card-form">
           <div class="card-form__wrapper">
             <h4 class="card-form-title">Payment details</h4>
             <form @submit.prevent class="card-form__form">
-              <input type="button" @click="planSelected" />
               <myinputgroup :name="'Email'">
                 <myinput
                   :typeField="'email'"
@@ -148,17 +159,12 @@ const handlerCloseModal = () => {
               :price="planActive.price"
             />
             <ul class="card-feature__list">
-              <li class="list-item">
-                <p>all features in <span>basic includes</span></p>
-              </li>
-              <li class="list-item">
-                <p>all features in <span>basic includes</span></p>
-              </li>
-              <li class="list-item">
-                <p>all features in <span>basic includes</span></p>
-              </li>
-              <li class="list-item">
-                <p>all features in <span>basic includes</span></p>
+              <li
+                class="list-item"
+                v-for="adv in planActive.adventages"
+                :key="adv"
+              >
+                <p>{{ adv.message }}</p>
               </li>
             </ul>
             <mybutton
@@ -174,6 +180,13 @@ const handlerCloseModal = () => {
 </template>
 
 <style lang="scss" scoped>
+
+.select__body{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .list-item {
   display: flex;
   align-items: center;

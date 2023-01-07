@@ -84,7 +84,8 @@ export const useCounterStore = defineStore('counter', {
                 ]
             },
                 
-        ]
+        ],
+        activeIndex:4,
     }),
     getters: {
 
@@ -92,19 +93,14 @@ export const useCounterStore = defineStore('counter', {
       getPlanById:(state)=>{
         return (planId)=>state.plans.find((plan) => plan.idPlan === planId)
         
-      }
+      },
+      getActiveIndex:(state)=>state.activeIndex,
+      
     },
     actions:{
-        increment(){
-            this.count++;
+        setActiveIndex(value){
+            this.activeIndex=value;
         },
-        doubleIncrent(){
-            this.count+=2;
-        },
-        someIncremnt(nums){
-            this.count+=nums;
-        }
-
     }
 
   })
