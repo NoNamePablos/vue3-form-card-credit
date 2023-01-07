@@ -1,6 +1,6 @@
 # vue-payment-steps
 
-This template should help get you started developing with Vue 3 in Vite.
+Create UI components:modal,input,button,checkbox and practice with pinia
 
 ## Recommended IDE Setup
 
