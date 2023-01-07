@@ -7,6 +7,7 @@ import CardGlasm from '@/components/cardGlasm.vue';
 import CardPlan from '@/components/cardPlan.vue';
 import { useCounterStore } from '@/store.js';
 import MyModal from '@/components/mymodal.vue';
+import { storeToRefs } from 'pinia';
 
 components: {
   Layout, cardPaymentVue, CardTotal, CardGlasm, CardPlan;
@@ -23,7 +24,8 @@ const formPayment = reactive({
   CVV: '',
   promocode: '',
 });
-const promo = ref('PROMO1');
+
+const total = ref(0);
 
 const modalPlanSelect = ref();
 
@@ -35,19 +37,25 @@ const planSelected = () => {
 const handlerSelectModal = () => {
   try {
     store.setActiveIndex(modalPlanSelect.value);
+    planSelected();
+    calculateTotal();
   } catch (err) {
     throw new ReferenceError('undefind');
   }
-  planSelected();
 };
 
 onMounted(() => {
   planSelected();
+  calculateTotal();
 });
+
+const calculateTotal = () => {
+  total.value = planActive.value.price + store.getPlatformFee;
+};
 watch(
   () => formPayment.promocode,
   (prom) => {
-    isPromoValid.value = prom == promo.value ? true : false;
+    isPromoValid.value = prom == store.getPromo.title ? true : false;
   }
 );
 
@@ -57,6 +65,7 @@ const isPromoValid = ref(false);
 const handlerCloseModal = () => {
   isModalOpen.value = false;
 };
+const totalPrice = () => {};
 </script>
 
 <template>
@@ -132,10 +141,14 @@ const handlerCloseModal = () => {
                   v-model="formPayment.promocode"
                 />
               </myinputgroup>
-              <CardTotal :text="'Subtotal'" :value="64" />
-              <CardTotal :text="'Platform Fee'" :value="4" />
-              <CardTotal :text="'Promocode'" :value="12" v-if="isPromoValid" />
-              <CardTotal :text="'Total Amount'" :value="100" />
+              <CardTotal :text="'Subtotal'" :value="planActive.price" />
+              <CardTotal :text="'Platform Fee'" :value="store.getPlatformFee" />
+              <CardTotal
+                :text="'Promocode'"
+                :value="store.getPromo.price"
+                v-if="isPromoValid"
+              />
+              <CardTotal :text="'Total Amount'" :value="total" />
               <mybutton :type="'submit'" :clases="['button-primary']"
                 >Make payment</mybutton
               >
@@ -180,8 +193,7 @@ const handlerCloseModal = () => {
 </template>
 
 <style lang="scss" scoped>
-
-.select__body{
+.select__body {
   display: flex;
   flex-direction: column;
   gap: 20px;

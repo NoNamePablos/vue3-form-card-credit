@@ -86,6 +86,11 @@ export const useCounterStore = defineStore('counter', {
                 
         ],
         activeIndex:4,
+        platformFee:12,
+        promocode:{
+            title:"PROMO1",
+            price:10,
+        }
     }),
     getters: {
 
@@ -95,7 +100,9 @@ export const useCounterStore = defineStore('counter', {
         
       },
       getActiveIndex:(state)=>state.activeIndex,
-      
+      //fix problem if array promo
+      getPromo:(state)=>state.promocode,
+      getPlatformFee:(state)=>state.platformFee,
     },
     actions:{
         setActiveIndex(value){
